@@ -75,7 +75,13 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     public void exitDynamic_result(ArcadiaParser.Dynamic_resultContext ctx){
         String rvalue = ctx.getText();
         ArcadiaSymbol symbol = symbolTable.get(rvalue);
-        mainMethod.visitVarInsn(ILOAD, symbol.getSymbolId());
+        String vmType = symbol.getVMType();
+        if(vmType == "I") {
+            mainMethod.visitVarInsn(ILOAD, symbol.getSymbolId());
+        }else {
+            //assume to be an object
+            mainMethod.visitVarInsn(ALOAD, symbol.getSymbolId());
+        }
         callDescriptor = callDescriptor.concat(symbol.getVMType());
     }
 
@@ -84,7 +90,10 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         String param = ctx.getText();
         param = param.substring(1, param.length() - 1);
         mainMethod.visitLdcInsn(param);
-        callDescriptor = callDescriptor.concat("Ljava/lang/String;");
+        if(callDescriptor != null) {
+            //if we're in a function call block...
+            callDescriptor = callDescriptor.concat("Ljava/lang/String;");
+        }
     }
 
 
@@ -98,6 +107,8 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
                 funcName,
                 callDescriptor,
                 false);
+
+        callDescriptor = null;
 
     }
 
@@ -114,6 +125,21 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
 
         mainMethod.visitIntInsn(BIPUSH, rvalue.shortValue()); //TODO: support larger integers
         mainMethod.visitVarInsn(ISTORE, symbol.getSymbolId());
+    }
+
+    @Override
+    public void exitString_assignment(ArcadiaParser.String_assignmentContext ctx) {
+        String lvalue = ctx.lvalue().getText();
+        String rvalue = ctx.string_result().getText();
+        ArcadiaSymbol symbol = symbolTable.get(lvalue);
+        if(symbol == null){
+            //define variable
+            symbol = new ArcadiaSymbol(lvalue, "Ljava/lang/String;", symbolTable.size() + 1);
+            symbolTable.put(lvalue, symbol);
+        }
+
+        //mainMethod.visitLdcInsn(rvalue);
+        mainMethod.visitVarInsn(ASTORE, symbol.getSymbolId());
     }
 
     @Override

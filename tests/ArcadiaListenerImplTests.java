@@ -38,6 +38,22 @@ public class ArcadiaListenerImplTests {
     }
 
     @Test
+    public void testCanDefineStringVariable() {
+        ArcadiaProgram prog = null;
+        try {
+            prog = ArcadiaCompiler.compile("i = \"Hi!\"\n_debug i\n");
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        String output = (String) prog._debugOutput;
+        assertEquals("Hi!", output);
+    }
+
+    @Test
     public void testCanPassStringArgument() {
         ArcadiaProgram prog = null;
         try {
