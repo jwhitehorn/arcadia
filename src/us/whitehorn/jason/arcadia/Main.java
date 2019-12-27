@@ -5,12 +5,11 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import us.whitehorn.jason.arcadia.compiler.ArcadiaCompiler;
+import us.whitehorn.jason.arcadia.compiler.ArcadiaListenerImpl;
 import us.whitehorn.jason.arcadia.compiler.ArcadiaLexer;
 import us.whitehorn.jason.arcadia.compiler.ArcadiaParser;
 import us.whitehorn.jason.arcadia.core.ArcadiaProgram;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 public class Main {
@@ -25,17 +24,8 @@ public class Main {
                 InputStream script = Main.class.getResource("/repl.arc").openStream();
                 input = CharStreams.fromStream(script);
             }
-            ArcadiaLexer lexer = new ArcadiaLexer(input);
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
-            ArcadiaParser parser = new ArcadiaParser(tokens);
 
-            ParseTree tree = parser.prog();
-            ParseTreeWalker walker = new ParseTreeWalker();
-
-            ArcadiaCompiler compiler = new ArcadiaCompiler();
-            walker.walk(compiler, tree);
-            ArcadiaProgram program = compiler.finish();
-
+            ArcadiaProgram program = ArcadiaCompiler.compile(input);
             program.run();
 
         } catch (Exception e) {
