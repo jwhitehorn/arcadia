@@ -16,4 +16,9 @@ public class ArcadiaProgram {
 
     }
 
+    public Object _debugOutput;
+    public void _debug(int var){
+        _debugOutput = var;
+    }
+
 }

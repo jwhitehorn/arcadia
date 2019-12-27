@@ -11,7 +11,7 @@ public class ArcadiaListenerImplTests {
     public void testCanCompileNothing() {
         ArcadiaProgram prog = null;
         try {
-            prog = ArcadiaCompiler.compile("");
+            prog = ArcadiaCompiler.compile("\n");
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -19,5 +19,21 @@ public class ArcadiaListenerImplTests {
         }
 
         assertNotNull(prog);
+    }
+
+    @Test
+    public void testCanDefineIntegerVariable() {
+        ArcadiaProgram prog = null;
+        try {
+            prog = ArcadiaCompiler.compile("i = 3\n_debug i\n");
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        int output = (int) prog._debugOutput;
+        assertEquals(3, output);
     }
 }

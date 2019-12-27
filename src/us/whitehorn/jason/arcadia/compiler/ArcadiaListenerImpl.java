@@ -24,6 +24,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         funcTable = new Hashtable<>();
         //Define built-in functions
         funcTable.put("puts", "V");
+        funcTable.put("_debug", "V");
 
         //https://dzone.com/articles/fully-dynamic-classes-with-asms
         cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
