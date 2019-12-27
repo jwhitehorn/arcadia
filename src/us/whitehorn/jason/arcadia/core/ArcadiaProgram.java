@@ -16,24 +16,4 @@ public class ArcadiaProgram {
 
     }
 
-    public Object _invoke_func(String funcName, Object[] args){
-        try {
-            Class cls = Class.forName("us.whitehorn.jason.arcadia.DynamicArcadiaProgram");
-
-            Class[] paramString = new Class[1];
-            paramString[0] = String.class;
-            Method method = cls.getDeclaredMethod(funcName, paramString);
-
-            method.invoke(this, args);
-        } catch (ClassNotFoundException e) { } catch (NoSuchMethodException e) {
-            //TODO implement method_missing
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
 }
