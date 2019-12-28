@@ -21,6 +21,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     Hashtable<String, ArcadiaSymbol> symbolTable;
     Hashtable<String, String> funcTable;
     String callDescriptor;
+    Boolean debug = true;
 
     public ArcadiaListenerImpl(){
         symbolTable = new Hashtable<>();
@@ -70,56 +71,14 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
 
     @Override
     public void enterFunction_call(ArcadiaParser.Function_callContext ctx) {
+        _debug("enterFunction_call");
         mainMethod.visitVarInsn(ALOAD, 0);                 // Load "this" onto the stack
         callDescriptor = "(";
     }
 
     @Override
-    public void exitDynamic_result(ArcadiaParser.Dynamic_resultContext ctx){
-        String rvalue = ctx.getText();
-        ArcadiaSymbol symbol = symbolTable.get(rvalue);
-        String vmType = symbol.getVMType();
-        if(vmType == "I") {
-            mainMethod.visitVarInsn(ILOAD, symbol.getSymbolId());
-        }else {
-            //assume to be an object
-            mainMethod.visitVarInsn(ALOAD, symbol.getSymbolId());
-        }
-        if(callDescriptor != null) {
-            //if we're in a method call...
-            callDescriptor = callDescriptor.concat(symbol.getVMType());
-        }
-    }
-
-    @Override
-    public void exitString_result(ArcadiaParser.String_resultContext ctx) {
-        String param = ctx.getText();
-        param = param.substring(1, param.length() - 1);
-        mainMethod.visitLdcInsn(param);
-        if(callDescriptor != null) {
-            //if we're in a function call block...
-            callDescriptor = callDescriptor.concat("Ljava/lang/String;");
-        }
-    }
-
-
-    @Override
-    public void exitFunction_call(ArcadiaParser.Function_callContext ctx){
-        String funcName = ctx.function_name().getText();
-        callDescriptor = callDescriptor.concat(")").concat(funcTable.get(funcName));
-
-        mainMethod.visitMethodInsn(INVOKEVIRTUAL,
-                "us/whitehorn/jason/arcadia/DynamicArcadiaProgram",
-                funcName,
-                callDescriptor,
-                false);
-
-        callDescriptor = null;
-
-    }
-
-    @Override
     public void exitInt_result(ArcadiaParser.Int_resultContext ctx) {
+        _debug("exitInt_result");
         for (ParseTree t : ctx.children) {
             String txt = t.getText();
             if (t instanceof TerminalNodeImpl) {
@@ -136,7 +95,68 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     }
 
     @Override
+    public void exitDynamic_result(ArcadiaParser.Dynamic_resultContext ctx){
+        _debug("exitDynamic_result");
+        for (ParseTree t : ctx.children) {
+            if (t instanceof TerminalNodeImpl) {
+                continue;   //we'll get these later
+            }
+            String rvalue = t.getText();
+            ArcadiaSymbol symbol = symbolTable.get(rvalue);
+            if(symbol == null){
+                continue; //these are likely literals are were picked up by other rules
+            }
+            String vmType = symbol.getVMType();
+            if (vmType == "I") {
+                mainMethod.visitVarInsn(ILOAD, symbol.getSymbolId());
+            } else {
+                //assume to be an object
+                mainMethod.visitVarInsn(ALOAD, symbol.getSymbolId());
+            }
+            if (callDescriptor != null) {
+                //if we're in a method call...
+                callDescriptor = callDescriptor.concat(symbol.getVMType());
+            }
+        }
+        if(ctx.op != null) {
+            String op = ctx.op.getText();
+            //TODO: look at op
+            mainMethod.visitInsn(IADD);
+        }
+    }
+
+    @Override
+    public void exitString_result(ArcadiaParser.String_resultContext ctx) {
+        _debug("exitString_result");
+        String param = ctx.getText();
+        param = param.substring(1, param.length() - 1);
+        mainMethod.visitLdcInsn(param);
+        if(callDescriptor != null) {
+            //if we're in a function call block...
+            callDescriptor = callDescriptor.concat("Ljava/lang/String;");
+        }
+    }
+
+
+    @Override
+    public void exitFunction_call(ArcadiaParser.Function_callContext ctx){
+        _debug("exitFunction_call");
+        String funcName = ctx.function_name().getText();
+        callDescriptor = callDescriptor.concat(")").concat(funcTable.get(funcName));
+
+        mainMethod.visitMethodInsn(INVOKEVIRTUAL,
+                "us/whitehorn/jason/arcadia/DynamicArcadiaProgram",
+                funcName,
+                callDescriptor,
+                false);
+
+        callDescriptor = null;
+
+    }
+
+    @Override
     public void exitInt_assignment(ArcadiaParser.Int_assignmentContext ctx){
+        _debug("exitInt_assignment");
         String lvalue = ctx.lvalue().getText();
         ArcadiaSymbol symbol = symbolTable.get(lvalue);
         if(symbol == null){
@@ -144,12 +164,13 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             symbol = new ArcadiaSymbol(lvalue, "I", symbolTable.size() + 1);
             symbolTable.put(lvalue, symbol);
         }
-        
+
         mainMethod.visitVarInsn(ISTORE, symbol.getSymbolId());
     }
 
     @Override
     public void exitString_assignment(ArcadiaParser.String_assignmentContext ctx) {
+        _debug("exitString_assignment");
         String lvalue = ctx.lvalue().getText();
         String rvalue = ctx.string_result().getText();
         ArcadiaSymbol symbol = symbolTable.get(lvalue);
@@ -165,6 +186,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
 
     @Override
     public void exitDynamic_assignment(ArcadiaParser.Dynamic_assignmentContext ctx) {
+        _debug("exitDynamic_assignment");
         String lvalue = ctx.lvalue().getText();
         String rvalue = ctx.dynamic_result().getText();
         ArcadiaSymbol rsymbol = symbolTable.get(rvalue);
@@ -181,16 +203,19 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
 
     @Override
     public void enterWhile_statement(ArcadiaParser.While_statementContext ctx) {
+        _debug("enterWhile_statement");
         Label begin = new Label();
         mainMethod.visitLabel(begin);
     }
 
     @Override
     public void exitWhile_statement(ArcadiaParser.While_statementContext ctx){
+        _debug("exitWhile_statement");
 
     }
 
     public ArcadiaProgram finish() throws IllegalAccessException, InstantiationException {
+        _debug("finish");
         mainMethod.visitInsn(RETURN);                      // End the constructor method
         mainMethod.visitMaxs(1, 1);                        // Specify max stack and local vars
 
@@ -200,5 +225,11 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         ArcadiaProgram prog = (ArcadiaProgram)clazz.newInstance();
 
         return prog;
+    }
+
+    private void _debug(String msg){
+        if(debug) {
+            System.out.println(msg);
+        }
     }
 }
