@@ -1,4 +1,7 @@
 package us.whitehorn.jason.arcadia.compiler;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -116,17 +119,32 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     }
 
     @Override
+    public void exitInt_result(ArcadiaParser.Int_resultContext ctx) {
+        for (ParseTree t : ctx.children) {
+            String txt = t.getText();
+            if (t instanceof TerminalNodeImpl) {
+                //do nothing, yet
+            } else {
+                mainMethod.visitIntInsn(BIPUSH, Integer.parseInt(txt)); //TODO: support larger than shorts
+            }
+        }
+        if(ctx.op != null) {
+            String op = ctx.op.getText();
+            //TODO: look at op
+            mainMethod.visitInsn(IADD);
+        }
+    }
+
+    @Override
     public void exitInt_assignment(ArcadiaParser.Int_assignmentContext ctx){
         String lvalue = ctx.lvalue().getText();
-        Integer rvalue = Integer.valueOf(ctx.int_result().getText());
         ArcadiaSymbol symbol = symbolTable.get(lvalue);
         if(symbol == null){
             //define variable
             symbol = new ArcadiaSymbol(lvalue, "I", symbolTable.size() + 1);
             symbolTable.put(lvalue, symbol);
         }
-
-        mainMethod.visitIntInsn(BIPUSH, rvalue.shortValue()); //TODO: support larger integers
+        
         mainMethod.visitVarInsn(ISTORE, symbol.getSymbolId());
     }
 

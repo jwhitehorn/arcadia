@@ -97,4 +97,23 @@ public class ArcadiaListenerImplTests {
         int output = (int) prog._debugOutput;
         assertEquals(4, output);
     }
+
+    @Test
+    public void testIntegerAddition() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 3 + 1 \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        int output = (int) prog._debugOutput;
+        assertEquals(4, output);
+    }
 }
