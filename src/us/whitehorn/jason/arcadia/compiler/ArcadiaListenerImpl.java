@@ -16,12 +16,12 @@ import java.util.Hashtable;
 import static org.objectweb.asm.Opcodes.*;
 
 public class ArcadiaListenerImpl extends ArcadiaBaseListener {
-    ClassWriter cw;
-    MethodVisitor mainMethod;
-    Hashtable<String, ArcadiaSymbol> symbolTable;
-    Hashtable<String, String> funcTable;
-    String callDescriptor;
-    Boolean debug = true;
+    private ClassWriter cw;
+    private MethodVisitor mainMethod;
+    private Hashtable<String, ArcadiaSymbol> symbolTable;
+    private Hashtable<String, String> funcTable;
+    private String callDescriptor;
+    private Boolean debug = true;
 
     public ArcadiaListenerImpl(){
         symbolTable = new Hashtable<>();
