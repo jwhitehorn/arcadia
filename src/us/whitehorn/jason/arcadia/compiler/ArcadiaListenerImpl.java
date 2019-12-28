@@ -82,7 +82,10 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             //assume to be an object
             mainMethod.visitVarInsn(ALOAD, symbol.getSymbolId());
         }
-        callDescriptor = callDescriptor.concat(symbol.getVMType());
+        if(callDescriptor != null) {
+            //if we're in a method call...
+            callDescriptor = callDescriptor.concat(symbol.getVMType());
+        }
     }
 
     @Override
@@ -140,6 +143,22 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
 
         //mainMethod.visitLdcInsn(rvalue);
         mainMethod.visitVarInsn(ASTORE, symbol.getSymbolId());
+    }
+
+    @Override
+    public void exitDynamic_assignment(ArcadiaParser.Dynamic_assignmentContext ctx) {
+        String lvalue = ctx.lvalue().getText();
+        String rvalue = ctx.dynamic_result().getText();
+        ArcadiaSymbol rsymbol = symbolTable.get(rvalue);
+
+        ArcadiaSymbol lsymbol = symbolTable.get(lvalue);
+        if(lsymbol == null){
+            //define variable
+            lsymbol = new ArcadiaSymbol(lvalue, rsymbol.getVMType(), symbolTable.size() + 1);
+            symbolTable.put(lvalue, lsymbol);
+        }
+
+        mainMethod.visitVarInsn(ISTORE, lsymbol.getSymbolId());
     }
 
     @Override

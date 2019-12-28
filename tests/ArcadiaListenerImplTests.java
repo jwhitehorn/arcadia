@@ -68,4 +68,20 @@ public class ArcadiaListenerImplTests {
         String output = (String) prog._debugOutput;
         assertEquals("Hi!", output);
     }
+
+    @Test
+    public void testAssignIntegerVariableToAnother() {
+        ArcadiaProgram prog = null;
+        try {
+            prog = ArcadiaCompiler.compile("i = 3\nj = 4\ni = j\n_debug i\n");
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        int output = (int) prog._debugOutput;
+        assertEquals(4, output);
+    }
 }
