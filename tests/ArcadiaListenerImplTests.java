@@ -24,8 +24,11 @@ public class ArcadiaListenerImplTests {
     @Test
     public void testCanDefineIntegerVariable() {
         ArcadiaProgram prog = null;
+        String script =
+                "i = 3 \n" +
+                "_debug i \n";
         try {
-            prog = ArcadiaCompiler.compile("i = 3\n_debug i\n");
+            prog = ArcadiaCompiler.compile(script);
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -40,8 +43,11 @@ public class ArcadiaListenerImplTests {
     @Test
     public void testCanDefineStringVariable() {
         ArcadiaProgram prog = null;
+        String script =
+                "i = \"Hi!\" \n" +
+                "_debug i \n";
         try {
-            prog = ArcadiaCompiler.compile("i = \"Hi!\"\n_debug i\n");
+            prog = ArcadiaCompiler.compile(script);
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -56,8 +62,10 @@ public class ArcadiaListenerImplTests {
     @Test
     public void testCanPassStringArgument() {
         ArcadiaProgram prog = null;
+        String script =
+                "_debug \"Hi!\" \n";
         try {
-            prog = ArcadiaCompiler.compile("_debug \"Hi!\"\n");
+            prog = ArcadiaCompiler.compile(script);
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -72,8 +80,13 @@ public class ArcadiaListenerImplTests {
     @Test
     public void testAssignIntegerVariableToAnother() {
         ArcadiaProgram prog = null;
+        String script =
+                "i = 3 \n" +
+                "j = 4 \n" +
+                "i = j \n" +
+                "_debug i \n";
         try {
-            prog = ArcadiaCompiler.compile("i = 3\nj = 4\ni = j\n_debug i\n");
+            prog = ArcadiaCompiler.compile(script);
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
