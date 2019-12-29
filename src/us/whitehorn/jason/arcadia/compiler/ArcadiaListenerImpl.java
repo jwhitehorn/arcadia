@@ -5,14 +5,15 @@ import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import us.whitehorn.jason.arcadia.core.ArcadiaBlockScope;
 import us.whitehorn.jason.arcadia.core.ArcadiaProgram;
 import us.whitehorn.jason.arcadia.core.ArcadiaSymbol;
 import us.whitehorn.jason.arcadia.core.DynamicClassLoader;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.*;
+
 import static org.objectweb.asm.Opcodes.*;
 
 public class ArcadiaListenerImpl extends ArcadiaBaseListener {
@@ -20,6 +21,8 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     private MethodVisitor mainMethod;
     private Hashtable<String, ArcadiaSymbol> symbolTable;
     private Hashtable<String, String> funcTable;
+    private Stack<ArcadiaBlockScope> scope;
+
     private String callDescriptor;
     private Boolean debug = true;
 
@@ -29,6 +32,8 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         //Define built-in functions
         funcTable.put("puts", "V");
         funcTable.put("_debug", "V");
+
+        scope = new Stack<>();
 
         //https://dzone.com/articles/fully-dynamic-classes-with-asms
         cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
@@ -97,6 +102,9 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     @Override
     public void exitDynamic_result(ArcadiaParser.Dynamic_resultContext ctx){
         _debug("exitDynamic_result");
+        if(ctx.parent instanceof ArcadiaParser.Dynamic_resultContext){
+            return; //HACK: dynamic results can be nested.
+        }
         for (ParseTree t : ctx.children) {
             if (t instanceof TerminalNodeImpl) {
                 continue;   //we'll get these later
@@ -191,6 +199,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         String rvalue = ctx.dynamic_result().getText();
         ArcadiaSymbol rsymbol = symbolTable.get(rvalue);
 
+
         ArcadiaSymbol lsymbol = symbolTable.get(lvalue);
         if(lsymbol == null){
             //define variable
@@ -199,19 +208,38 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         }
 
         mainMethod.visitVarInsn(ISTORE, lsymbol.getSymbolId());
+
+    }
+
+    @Override
+    public void exitComparison(ArcadiaParser.ComparisonContext ctx) {
+        _debug("exitComparison");
+        ArcadiaBlockScope currentBlock = scope.peek();
+
+        //TODO: support multiple comparisons, and automatically invert operator
+       mainMethod.visitJumpInsn(IF_ICMPGE, currentBlock.getBlockEnd()); // < comparison becomes >= comparison
+    }
+
+    @Override
+    public void exitCond_expression(ArcadiaParser.Cond_expressionContext ctx) {
+        _debug("exitCond_expression");
+
     }
 
     @Override
     public void enterWhile_statement(ArcadiaParser.While_statementContext ctx) {
         _debug("enterWhile_statement");
-        Label begin = new Label();
-        mainMethod.visitLabel(begin);
+        ArcadiaBlockScope loopScope = new ArcadiaBlockScope();
+        scope.push(loopScope);
+        mainMethod.visitLabel(loopScope.getBlockStart());
     }
 
     @Override
     public void exitWhile_statement(ArcadiaParser.While_statementContext ctx){
         _debug("exitWhile_statement");
-
+        ArcadiaBlockScope loopScope = scope.pop();
+        mainMethod.visitJumpInsn(GOTO, loopScope.getBlockStart());
+        mainMethod.visitLabel(loopScope.getBlockEnd());
     }
 
     public ArcadiaProgram finish() throws IllegalAccessException, InstantiationException {
