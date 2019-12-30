@@ -286,6 +286,12 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             // < comparison becomes >= comparison
             if (vmType.equals("I")) {
                 mainMethod.visitJumpInsn(IF_ICMPGE, currentBlock.getBlockEnd());
+            }else if(vmType.equals("F")){
+                Label skip = new Label();
+                mainMethod.visitInsn(FCMPG);
+                mainMethod.visitJumpInsn(IFLT, skip);
+                mainMethod.visitJumpInsn(GOTO, currentBlock.getBlockEnd());
+                mainMethod.visitLabel(skip);
             }
         }else if(op.equals("!=")){
             // != comparison becomes == comparison

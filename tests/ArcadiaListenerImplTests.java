@@ -275,7 +275,7 @@ public class ArcadiaListenerImplTests {
     }
 
     @Test
-    public void testWhileLoopWithFloatConditional() {
+    public void testWhileLoopWithFloatLessThanOrEqualConditional() {
         ArcadiaProgram prog = null;
         String script =
                 "i = 0.5 \n" +
@@ -294,6 +294,28 @@ public class ArcadiaListenerImplTests {
         prog.run();
         float output = (float) prog._debugOutput;
         assertEquals(3.5, output, 0.001);
+    }
+
+    @Test
+    public void testWhileLoopWithFloatLessThanConditional() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 0.5 \n" +
+                "while i < 3.0 \n" +
+                "    i = i + 0.5 \n" +
+                "end \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        float output = (float) prog._debugOutput;
+        assertEquals(3.0, output, 0.001);
     }
 
     @Test
