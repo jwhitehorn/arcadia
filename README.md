@@ -7,3 +7,17 @@ A small, dynamic, language built with Ruby-like syntax and focused on developmen
 ```RUBY
 puts "Welcome to Arcadia"
 ```
+
+Arcadia is a small dynamic language designed to put the developer experience first while prioritizing efficient utilization of modern computer's multi-core processors and GPUs.
+
+Types include:
+
+Strings, Integers, and Float (more coming soon).
+
+```RUBY
+i = 0
+while i < 100
+  i = i + i
+  puts "HI!"
+end
+``` 
