@@ -104,6 +104,28 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     }
 
     @Override
+    public void exitFloat_result(ArcadiaParser.Float_resultContext ctx) {
+        _debug("exitFloat_result");
+        for (ParseTree t : ctx.children) {
+            String txt = t.getText();
+            if (t instanceof TerminalNodeImpl) {
+                //do nothing, yet
+            } else {
+                mainMethod.visitLdcInsn(Float.parseFloat(txt));
+            }
+        }
+        if(ctx.op != null) {
+            String op = ctx.op.getText();
+            if(op.equals("+")) {
+                mainMethod.visitInsn(FADD);
+            }else if(op.equals("-")){
+                mainMethod.visitInsn(FSUB);
+            }
+            //TODO: more operations
+        }
+    }
+
+    @Override
     public void exitDynamic_result(ArcadiaParser.Dynamic_resultContext ctx){
         _debug("exitDynamic_result");
         if(ctx.parent instanceof ArcadiaParser.Dynamic_resultContext){
@@ -119,8 +141,10 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
                 continue; //these are likely literals are were picked up by other rules
             }
             String vmType = symbol.getVMType();
-            if (vmType == "I") {
+            if (vmType.equals("I")) {
                 mainMethod.visitVarInsn(ILOAD, symbol.getSymbolId());
+            } else if(vmType.equals("F")){
+                mainMethod.visitVarInsn(FLOAD, symbol.getSymbolId());
             } else {
                 //assume to be an object
                 mainMethod.visitVarInsn(ALOAD, symbol.getSymbolId());
@@ -178,6 +202,20 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         }
 
         mainMethod.visitVarInsn(ISTORE, symbol.getSymbolId());
+    }
+
+    @Override
+    public void exitFloat_assignment(ArcadiaParser.Float_assignmentContext ctx) {
+        _debug("exitFloat_assignment");
+        String lvalue = ctx.lvalue().getText();
+        ArcadiaSymbol symbol = symbolTable.get(lvalue);
+        if(symbol == null){
+            //define variable
+            symbol = new ArcadiaSymbol(lvalue, "F", symbolTable.size() + 1);
+            symbolTable.put(lvalue, symbol);
+        }
+
+        mainMethod.visitVarInsn(FSTORE, symbol.getSymbolId());
     }
 
     @Override

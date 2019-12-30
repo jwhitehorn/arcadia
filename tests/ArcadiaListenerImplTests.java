@@ -26,7 +26,7 @@ public class ArcadiaListenerImplTests {
         ArcadiaProgram prog = null;
         String script =
                 "i = 3 \n" +
-                "_debug i \n";
+                        "_debug i \n";
         try {
             prog = ArcadiaCompiler.compile(script);
         } catch (InstantiationException e) {
@@ -38,6 +38,25 @@ public class ArcadiaListenerImplTests {
         prog.run();
         int output = (int) prog._debugOutput;
         assertEquals(3, output);
+    }
+
+    @Test
+    public void testDefineFloatVariable() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 0.5 \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        Float output = (Float) prog._debugOutput;
+        assertEquals(0.5, output, 0.001);
     }
 
     @Test

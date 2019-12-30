@@ -23,5 +23,8 @@ public class ArcadiaProgram {
     public void _debug(String var){
         _debugOutput = var;
     }
+    public void _debug(float var){
+        _debugOutput = var;
+    }
 
 }
