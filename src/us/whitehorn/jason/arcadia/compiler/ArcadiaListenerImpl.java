@@ -243,6 +243,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         }
 
         //mainMethod.visitLdcInsn(rvalue);
+        vmTypeStack.pop();
         mainMethod.visitVarInsn(ASTORE, symbol.getSymbolId());
     }
 
