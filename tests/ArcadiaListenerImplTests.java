@@ -26,7 +26,7 @@ public class ArcadiaListenerImplTests {
         ArcadiaProgram prog = null;
         String script =
                 "i = 3 \n" +
-                        "_debug i \n";
+                "_debug i \n";
         try {
             prog = ArcadiaCompiler.compile(script);
         } catch (InstantiationException e) {
@@ -100,7 +100,7 @@ public class ArcadiaListenerImplTests {
     public void testPassFloatArgument() {
         ArcadiaProgram prog = null;
         String script =
-                "_debug 0.6 \n";
+                "_debug 0.5 \n";
         try {
             prog = ArcadiaCompiler.compile(script);
         } catch (InstantiationException e) {
@@ -111,7 +111,25 @@ public class ArcadiaListenerImplTests {
         assertNotNull(prog);
         prog.run();
         Float output = (Float) prog._debugOutput;
-        assertEquals(0.06, output, 0.001);
+        assertEquals(0.5, output, 0.001);
+    }
+
+    @Test
+    public void testPassIntegerArgument() {
+        ArcadiaProgram prog = null;
+        String script =
+                "_debug 6 \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        int output = (int) prog._debugOutput;
+        assertEquals(6, output);
     }
 
     @Test

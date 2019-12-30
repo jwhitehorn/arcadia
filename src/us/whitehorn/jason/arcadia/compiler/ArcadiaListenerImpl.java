@@ -24,7 +24,6 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     private Stack<ArcadiaBlockScope> scope;
     private Stack<String> vmTypeStack;
 
-    private String callDescriptor;
     private Boolean debug = true;
 
     public ArcadiaListenerImpl(){
@@ -80,24 +79,28 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     public void enterFunction_call(ArcadiaParser.Function_callContext ctx) {
         _debug("enterFunction_call");
         mainMethod.visitVarInsn(ALOAD, 0);                 // Load "this" onto the stack
-        callDescriptor = "(";
     }
 
     @Override
     public void exitInt_result(ArcadiaParser.Int_resultContext ctx) {
         _debug("exitInt_result");
+        if(ctx.parent instanceof ArcadiaParser.Int_resultContext){
+            return; //HACK: dynamic results can be nested.
+        }
         for (ParseTree t : ctx.children) {
             String txt = t.getText();
             if (t instanceof TerminalNodeImpl) {
                 //do nothing, yet
             } else {
                 vmTypeStack.push("I");
+                System.out.println("+I");
                 mainMethod.visitIntInsn(BIPUSH, Integer.parseInt(txt)); //TODO: support larger than shorts
             }
         }
         if(ctx.op != null) {
             String op = ctx.op.getText();
             vmTypeStack.pop();
+            System.out.println("-I");
             if(op.equals("+")) {
                 mainMethod.visitInsn(IADD);
             }else if(op.equals("-")){
@@ -149,24 +152,22 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             String vmType = symbol.getVMType();
             if (vmType.equals("I")) {
                 vmTypeStack.push("I");
+                System.out.println("+I");
                 mainMethod.visitVarInsn(ILOAD, symbol.getSymbolId());
             } else if(vmType.equals("F")){
                 vmTypeStack.push("F");
                 mainMethod.visitVarInsn(FLOAD, symbol.getSymbolId());
             } else {
                 //assume to be an object
-                vmTypeStack.push("L");
+                vmTypeStack.push("Ljava/lang/String;");
                 mainMethod.visitVarInsn(ALOAD, symbol.getSymbolId());
-            }
-            if (callDescriptor != null) {
-                //if we're in a method call...
-                callDescriptor = callDescriptor.concat(symbol.getVMType());
             }
         }
         if(ctx.op != null) {
             String op = ctx.op.getText();
             //TODO: look at op
             vmTypeStack.pop();
+            System.out.println("-I");
             mainMethod.visitInsn(IADD);
         }
     }
@@ -177,11 +178,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         String param = ctx.getText();
         param = param.substring(1, param.length() - 1);
         mainMethod.visitLdcInsn(param);
-        vmTypeStack.push("L");
-        if(callDescriptor != null) {
-            //if we're in a function call block...
-            callDescriptor = callDescriptor.concat("Ljava/lang/String;");
-        }
+        vmTypeStack.push("Ljava/lang/String;");
     }
 
 
@@ -189,15 +186,18 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     public void exitFunction_call(ArcadiaParser.Function_callContext ctx){
         _debug("exitFunction_call");
         String funcName = ctx.function_name().getText();
-        callDescriptor = callDescriptor.concat(")").concat(funcTable.get(funcName));
+        String callDescriptor = ")".concat(funcTable.get(funcName));
+        while(vmTypeStack.empty() == false){
+            callDescriptor = vmTypeStack.pop() + callDescriptor;
+        }
+        callDescriptor = "(" + callDescriptor;
 
+        System.out.println("-->".concat(callDescriptor));
         mainMethod.visitMethodInsn(INVOKEVIRTUAL,
                 "us/whitehorn/jason/arcadia/DynamicArcadiaProgram",
                 funcName,
                 callDescriptor,
                 false);
-
-        callDescriptor = null;
 
     }
 
@@ -212,6 +212,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             symbolTable.put(lvalue, symbol);
         }
         vmTypeStack.pop();
+        System.out.println("-I");
         mainMethod.visitVarInsn(ISTORE, symbol.getSymbolId());
     }
 
