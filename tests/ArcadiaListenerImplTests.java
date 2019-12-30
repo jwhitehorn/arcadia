@@ -122,7 +122,7 @@ public class ArcadiaListenerImplTests {
         ArcadiaProgram prog = null;
         String script =
                 "i = 3 - 1 \n" +
-                        "_debug i \n";
+                "_debug i \n";
         try {
             prog = ArcadiaCompiler.compile(script);
         } catch (InstantiationException e) {
