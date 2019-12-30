@@ -220,8 +220,16 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         _debug("exitComparison");
         ArcadiaBlockScope currentBlock = scope.peek();
 
-        //TODO: support multiple comparisons, and automatically invert operator
-       mainMethod.visitJumpInsn(IF_ICMPGE, currentBlock.getBlockEnd()); // < comparison becomes >= comparison
+        String op = ctx.op.getText();
+        //in the next block of code we will do the opposite of the operator. So == becomes !=, > becomes <=, etc.
+        //this is because these comparisons are gatekeepers for the block and we're wiring up logic to jump over
+        //the block (the logical opposite of how the developer conceived it).
+        if(op.equals("<")) {
+            mainMethod.visitJumpInsn(IF_ICMPGE, currentBlock.getBlockEnd()); // < comparison becomes >= comparison
+        }else if(op.equals("!=")){
+            mainMethod.visitJumpInsn(IF_ICMPEQ, currentBlock.getBlockEnd()); // != comparison becomes == comparison
+        }
+        //TODO: more operators
     }
 
     @Override
