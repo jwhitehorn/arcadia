@@ -281,13 +281,25 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         //this is because these comparisons are gatekeepers for the block and we're wiring up logic to jump over
         //the block (the logical opposite of how the developer conceived it).
         vmTypeStack.pop();
-        vmTypeStack.pop();
+        String vmType = vmTypeStack.pop();
         if(op.equals("<")) {
-            mainMethod.visitJumpInsn(IF_ICMPGE, currentBlock.getBlockEnd()); // < comparison becomes >= comparison
+            // < comparison becomes >= comparison
+            if (vmType.equals("I")) {
+                mainMethod.visitJumpInsn(IF_ICMPGE, currentBlock.getBlockEnd());
+            }
         }else if(op.equals("!=")){
-            mainMethod.visitJumpInsn(IF_ICMPEQ, currentBlock.getBlockEnd()); // != comparison becomes == comparison
+            // != comparison becomes == comparison
+            if(vmType.equals("I")) {
+                mainMethod.visitJumpInsn(IF_ICMPEQ, currentBlock.getBlockEnd());
+            }
+        }else if(op.equals("<=")){
+            // <= becomes >
+            if(vmType.equals("F")){
+                mainMethod.visitInsn(FCMPG);
+                mainMethod.visitJumpInsn(IFGT, currentBlock.getBlockEnd());
+            }
         }
-        //TODO: more operators
+        //TODO: more operators & types
     }
 
     @Override
