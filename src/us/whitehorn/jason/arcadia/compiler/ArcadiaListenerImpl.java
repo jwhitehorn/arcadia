@@ -287,6 +287,8 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             if (vmType.equals("I")) {
                 mainMethod.visitJumpInsn(IF_ICMPGE, currentBlock.getBlockEnd());
             }else if(vmType.equals("F")){
+                //OK, not here.
+                //Here we're literally implementing the same logical operator and doing an extra jump
                 Label skip = new Label();
                 mainMethod.visitInsn(FCMPG);
                 mainMethod.visitJumpInsn(IFLT, skip);
