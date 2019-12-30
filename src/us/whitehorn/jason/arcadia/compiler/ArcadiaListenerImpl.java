@@ -94,8 +94,12 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         }
         if(ctx.op != null) {
             String op = ctx.op.getText();
-            //TODO: look at op
-            mainMethod.visitInsn(IADD);
+            if(op.equals("+")) {
+                mainMethod.visitInsn(IADD);
+            }else if(op.equals("-")){
+                mainMethod.visitInsn(ISUB);
+            }
+            //TODO: more operations
         }
     }
 

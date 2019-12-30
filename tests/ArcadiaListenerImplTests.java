@@ -118,6 +118,25 @@ public class ArcadiaListenerImplTests {
     }
 
     @Test
+    public void testIntegerSubtraction() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 3 - 1 \n" +
+                        "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        int output = (int) prog._debugOutput;
+        assertEquals(2, output);
+    }
+
+    @Test
     public void testIntegerIncrement() {
         ArcadiaProgram prog = null;
         String script =
@@ -166,6 +185,28 @@ public class ArcadiaListenerImplTests {
                 "i = 0 \n" +
                 "while i != 3 \n" +
                 "    i = i + 1 \n" +
+                "end \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        int output = (int) prog._debugOutput;
+        assertEquals(3, output);
+    }
+
+    @Test
+    public void testWhileLoopWithInequalityDecrement() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 6 \n" +
+                "while i != 3 \n" +
+                "    i = i - 1 \n" +
                 "end \n" +
                 "_debug i \n";
         try {
