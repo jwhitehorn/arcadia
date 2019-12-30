@@ -97,6 +97,24 @@ public class ArcadiaListenerImplTests {
     }
 
     @Test
+    public void testPassFloatArgument() {
+        ArcadiaProgram prog = null;
+        String script =
+                "_debug 0.6 \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        Float output = (Float) prog._debugOutput;
+        assertEquals(0.06, output, 0.001);
+    }
+
+    @Test
     public void testAssignIntegerVariableToAnother() {
         ArcadiaProgram prog = null;
         String script =
@@ -115,6 +133,27 @@ public class ArcadiaListenerImplTests {
         prog.run();
         int output = (int) prog._debugOutput;
         assertEquals(4, output);
+    }
+
+    @Test
+    public void testAssignFloatVariableToAnother() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 0.3 \n" +
+                "j = 0.4 \n" +
+                "i = j \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        Float output = (Float) prog._debugOutput;
+        assertEquals(0.4, output, 0.0001);
     }
 
     @Test

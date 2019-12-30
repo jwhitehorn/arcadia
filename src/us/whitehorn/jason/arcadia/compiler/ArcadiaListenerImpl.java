@@ -22,6 +22,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     private Hashtable<String, ArcadiaSymbol> symbolTable;
     private Hashtable<String, String> funcTable;
     private Stack<ArcadiaBlockScope> scope;
+    private Stack<String> vmTypeStack;
 
     private String callDescriptor;
     private Boolean debug = true;
@@ -34,6 +35,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         funcTable.put("_debug", "V");
 
         scope = new Stack<>();
+        vmTypeStack = new Stack<>();
 
         //https://dzone.com/articles/fully-dynamic-classes-with-asms
         cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
@@ -89,11 +91,13 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             if (t instanceof TerminalNodeImpl) {
                 //do nothing, yet
             } else {
+                vmTypeStack.push("I");
                 mainMethod.visitIntInsn(BIPUSH, Integer.parseInt(txt)); //TODO: support larger than shorts
             }
         }
         if(ctx.op != null) {
             String op = ctx.op.getText();
+            vmTypeStack.pop();
             if(op.equals("+")) {
                 mainMethod.visitInsn(IADD);
             }else if(op.equals("-")){
@@ -111,11 +115,13 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             if (t instanceof TerminalNodeImpl) {
                 //do nothing, yet
             } else {
+                vmTypeStack.push("F");
                 mainMethod.visitLdcInsn(Float.parseFloat(txt));
             }
         }
         if(ctx.op != null) {
             String op = ctx.op.getText();
+            vmTypeStack.pop();
             if(op.equals("+")) {
                 mainMethod.visitInsn(FADD);
             }else if(op.equals("-")){
@@ -142,11 +148,14 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             }
             String vmType = symbol.getVMType();
             if (vmType.equals("I")) {
+                vmTypeStack.push("I");
                 mainMethod.visitVarInsn(ILOAD, symbol.getSymbolId());
             } else if(vmType.equals("F")){
+                vmTypeStack.push("F");
                 mainMethod.visitVarInsn(FLOAD, symbol.getSymbolId());
             } else {
                 //assume to be an object
+                vmTypeStack.push("L");
                 mainMethod.visitVarInsn(ALOAD, symbol.getSymbolId());
             }
             if (callDescriptor != null) {
@@ -157,6 +166,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         if(ctx.op != null) {
             String op = ctx.op.getText();
             //TODO: look at op
+            vmTypeStack.pop();
             mainMethod.visitInsn(IADD);
         }
     }
@@ -167,6 +177,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         String param = ctx.getText();
         param = param.substring(1, param.length() - 1);
         mainMethod.visitLdcInsn(param);
+        vmTypeStack.push("L");
         if(callDescriptor != null) {
             //if we're in a function call block...
             callDescriptor = callDescriptor.concat("Ljava/lang/String;");
@@ -200,7 +211,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             symbol = new ArcadiaSymbol(lvalue, "I", symbolTable.size() + 1);
             symbolTable.put(lvalue, symbol);
         }
-
+        vmTypeStack.pop();
         mainMethod.visitVarInsn(ISTORE, symbol.getSymbolId());
     }
 
@@ -215,6 +226,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             symbolTable.put(lvalue, symbol);
         }
 
+        vmTypeStack.pop();
         mainMethod.visitVarInsn(FSTORE, symbol.getSymbolId());
     }
 
@@ -239,17 +251,22 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         _debug("exitDynamic_assignment");
         String lvalue = ctx.lvalue().getText();
         String rvalue = ctx.dynamic_result().getText();
-        ArcadiaSymbol rsymbol = symbolTable.get(rvalue);
+        String rVMType = vmTypeStack.pop();
 
 
         ArcadiaSymbol lsymbol = symbolTable.get(lvalue);
         if(lsymbol == null){
             //define variable
-            lsymbol = new ArcadiaSymbol(lvalue, rsymbol.getVMType(), symbolTable.size() + 1);
+            lsymbol = new ArcadiaSymbol(lvalue, rVMType, symbolTable.size() + 1);
             symbolTable.put(lvalue, lsymbol);
         }
 
-        mainMethod.visitVarInsn(ISTORE, lsymbol.getSymbolId());
+        if(rVMType.equals("I")) {
+            mainMethod.visitVarInsn(ISTORE, lsymbol.getSymbolId());
+        }else if(rVMType.equals("F")){
+            mainMethod.visitVarInsn(FSTORE, lsymbol.getSymbolId());
+        }
+        //TODO: other types
 
     }
 
@@ -262,6 +279,8 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         //in the next block of code we will do the opposite of the operator. So == becomes !=, > becomes <=, etc.
         //this is because these comparisons are gatekeepers for the block and we're wiring up logic to jump over
         //the block (the logical opposite of how the developer conceived it).
+        vmTypeStack.pop();
+        vmTypeStack.pop();
         if(op.equals("<")) {
             mainMethod.visitJumpInsn(IF_ICMPGE, currentBlock.getBlockEnd()); // < comparison becomes >= comparison
         }else if(op.equals("!=")){
