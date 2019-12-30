@@ -93,14 +93,12 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
                 //do nothing, yet
             } else {
                 vmTypeStack.push("I");
-                System.out.println("+I");
                 mainMethod.visitIntInsn(BIPUSH, Integer.parseInt(txt)); //TODO: support larger than shorts
             }
         }
         if(ctx.op != null) {
             String op = ctx.op.getText();
             vmTypeStack.pop();
-            System.out.println("-I");
             if(op.equals("+")) {
                 mainMethod.visitInsn(IADD);
             }else if(op.equals("-")){
@@ -152,7 +150,6 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             String vmType = symbol.getVMType();
             if (vmType.equals("I")) {
                 vmTypeStack.push("I");
-                System.out.println("+I");
                 mainMethod.visitVarInsn(ILOAD, symbol.getSymbolId());
             } else if(vmType.equals("F")){
                 vmTypeStack.push("F");
@@ -167,7 +164,6 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             String op = ctx.op.getText();
             //TODO: look at op
             vmTypeStack.pop();
-            System.out.println("-I");
             mainMethod.visitInsn(IADD);
         }
     }
@@ -192,7 +188,6 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         }
         callDescriptor = "(" + callDescriptor;
 
-        System.out.println("-->".concat(callDescriptor));
         mainMethod.visitMethodInsn(INVOKEVIRTUAL,
                 "us/whitehorn/jason/arcadia/DynamicArcadiaProgram",
                 funcName,
@@ -212,7 +207,6 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             symbolTable.put(lvalue, symbol);
         }
         vmTypeStack.pop();
-        System.out.println("-I");
         mainMethod.visitVarInsn(ISTORE, symbol.getSymbolId());
     }
 
