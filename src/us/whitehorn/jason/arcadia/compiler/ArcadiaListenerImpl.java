@@ -163,8 +163,13 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         if(ctx.op != null) {
             String op = ctx.op.getText();
             //TODO: look at op
-            vmTypeStack.pop();
-            mainMethod.visitInsn(IADD);
+            String vmType = vmTypeStack.pop();
+            if(vmType.equals("I")) {
+                mainMethod.visitInsn(IADD);
+            }else if(vmType.equals("F")){
+                mainMethod.visitInsn(FADD);
+            }
+            //TODO: more types
         }
     }
 

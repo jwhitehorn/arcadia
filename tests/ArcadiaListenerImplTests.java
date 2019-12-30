@@ -213,6 +213,26 @@ public class ArcadiaListenerImplTests {
     }
 
     @Test
+    public void testFloatAddition() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 0.4 \n" +
+                "i = i + 0.2 \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        float output = (float) prog._debugOutput;
+        assertEquals(0.6, output, 0.001);
+    }
+
+    @Test
     public void testIntegerIncrement() {
         ArcadiaProgram prog = null;
         String script =
