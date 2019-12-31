@@ -383,4 +383,86 @@ public class ArcadiaListenerImplTests {
         int output = (int) prog._debugOutput;
         assertEquals(3, output);
     }
+
+    @Test
+    public void testAssignFloatVariableToAnInteger() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 0.3 \n" +
+                "j = 4 \n" +
+                "j = i \n" +
+                "_debug j \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        Float output = (Float) prog._debugOutput;
+        assertEquals(0.3, output, 0.0001);
+    }
+
+    @Test
+    public void tesAddFloatToAnInteger() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 0.5 \n" +
+                "j = 1 \n" +
+                "k = i + j \n" +
+                "_debug k \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        Float output = (Float) prog._debugOutput;
+        assertEquals(1.5, output, 0.0001);
+    }
+
+    @Test
+    public void tesAddIntegerToAFloat() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 0.5 \n" +
+                        "j = 1 \n" +
+                        "k = j + i \n" +
+                        "_debug k \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        Float output = (Float) prog._debugOutput;
+        assertEquals(1.5, output, 0.0001);
+    }
+
+    @Test
+    public void tesAddFloatToAnIntegerWithoutIntermediates() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 1 + 0.5 \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        Float output = (Float) prog._debugOutput;
+        assertEquals(1.5, output, 0.0001);
+    }
 }

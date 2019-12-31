@@ -164,6 +164,32 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             String op = ctx.op.getText();
             //TODO: look at op
             String vmType = vmTypeStack.pop();
+            String otherVmType = vmTypeStack.peek();
+            if(vmType.equals(otherVmType) == false){
+                //if we're trying to operate on two different types let's
+                //first do a type conversation and then determine the proper
+                //new type
+                if(vmType.equals("I") && otherVmType.equals("F")){
+                    //The variable at the top of the stack is an Int
+                    //and the one below it is a Float. We should...
+                    mainMethod.visitInsn(I2F); //convert the int to a float
+
+                    //and then proceed with float as the data type
+                    vmType = "F";
+                }else if(vmType.equals("F") && otherVmType.equals("I")){
+                    //The variable at the top of the stack is a float
+                    //and the one before it is an Int.
+                    //This scenario is similar to the last one, except we must first...
+                    mainMethod.visitInsn(SWAP); //swap the top two variables so that we can
+                    mainMethod.visitInsn(I2F); //convert the int to a float
+
+                    //and then proceed with float as the data type
+                    vmType = "F";
+                    //but we must also ensure that our internal type stack is correct
+                    vmTypeStack.pop();
+                    vmTypeStack.push("F");
+                }
+            }
             if(vmType.equals("I")) {
                 mainMethod.visitInsn(IADD);
             }else if(vmType.equals("F")){
