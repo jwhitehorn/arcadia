@@ -244,24 +244,8 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     public void exitDynamic_assignment(ArcadiaParser.Dynamic_assignmentContext ctx) {
         _debug("exitDynamic_assignment");
         String lvalue = ctx.lvalue().getText();
-        String rvalue = ctx.dynamic_result().getText();
-        String rVMType = vmTypeStack.pop();
 
-
-        ArcadiaSymbol lsymbol = symbolTable.get(lvalue);
-        if(lsymbol == null){
-            //define variable
-            lsymbol = new ArcadiaSymbol(lvalue, rVMType, symbolTable.size() + 1);
-            symbolTable.put(lvalue, lsymbol);
-        }
-
-        if(rVMType.equals("I")) {
-            mainMethod.visitVarInsn(ISTORE, lsymbol.getSymbolId());
-        }else if(rVMType.equals("F")){
-            mainMethod.visitVarInsn(FSTORE, lsymbol.getSymbolId());
-        }
-        //TODO: other types
-
+        this._handleAssignment(lvalue);
     }
 
     @Override
@@ -382,5 +366,26 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             mainMethod.visitInsn(FADD);
         }
         //TODO: more types
+    }
+
+    private void _handleAssignment(String symbolName){
+        String rVMType = vmTypeStack.pop();
+        ArcadiaSymbol symbol = symbolTable.get(symbolName);
+
+        if(symbol == null){
+            //define variable if currently unused
+            symbol = new ArcadiaSymbol(symbolName, rVMType, symbolTable.size() + 1);
+            symbolTable.put(symbolName, symbol);
+        }else if(symbol.getVMType().equals(rVMType) == false){
+            //check to see if the symbol's type matches the new type, otherwise we need to fix that...
+            symbol.setVMType(rVMType);
+        }
+
+        if(rVMType.equals("I")) {
+            mainMethod.visitVarInsn(ISTORE, symbol.getSymbolId());
+        }else if(rVMType.equals("F")){
+            mainMethod.visitVarInsn(FSTORE, symbol.getSymbolId());
+        }
+        //TODO: other types
     }
 }
