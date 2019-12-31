@@ -302,7 +302,9 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             }
         }else if(op.equals("<=")){
             // <= becomes >
-            if(vmType.equals("F")){
+            if(vmType.equals("I")) {
+                mainMethod.visitJumpInsn(IF_ICMPGT, currentBlock.getBlockEnd());
+            }else if(vmType.equals("F")){
                 mainMethod.visitInsn(FCMPG);
                 mainMethod.visitJumpInsn(IFGT, currentBlock.getBlockEnd());
             }
