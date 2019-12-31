@@ -11,6 +11,9 @@ public class ArcadiaProgram {
     public void puts(int message){
         System.out.println(message);
     }
+    public void puts(float message){
+        System.out.println(message);
+    }
 
     public void run(){
 
