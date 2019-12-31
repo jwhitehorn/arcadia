@@ -382,11 +382,5 @@ public class ArcadiaListenerImplTests {
         prog.run();
         int output = (int) prog._debugOutput;
         assertEquals(3, output);
-
-        float i = 0.2f;
-        float j = 0.4f;
-        if(i < j){
-            System.out.println("less");
-        }
     }
 }
