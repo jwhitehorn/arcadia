@@ -87,6 +87,9 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         if(ctx.parent instanceof ArcadiaParser.Int_resultContext){
             return; //HACK: dynamic results can be nested.
         }
+        if(ctx.parent instanceof ArcadiaParser.Float_resultContext){
+            return; //HACK: dynamic results can be nested.
+        }
         for (ParseTree t : ctx.children) {
             String txt = t.getText();
             if (t instanceof TerminalNodeImpl) {
@@ -111,6 +114,9 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     @Override
     public void exitFloat_result(ArcadiaParser.Float_resultContext ctx) {
         _debug("exitFloat_result");
+        if(ctx.parent instanceof ArcadiaParser.Float_resultContext){
+            return; //HACK: dynamic results can be nested.
+        }
         for (ParseTree t : ctx.children) {
             String txt = t.getText();
             if (t instanceof TerminalNodeImpl) {
@@ -122,13 +128,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         }
         if(ctx.op != null) {
             String op = ctx.op.getText();
-            vmTypeStack.pop();
-            if(op.equals("+")) {
-                mainMethod.visitInsn(FADD);
-            }else if(op.equals("-")){
-                mainMethod.visitInsn(FSUB);
-            }
-            //TODO: more operations
+            _handleOp(op);
         }
     }
 
@@ -162,40 +162,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         }
         if(ctx.op != null) {
             String op = ctx.op.getText();
-            //TODO: look at op
-            String vmType = vmTypeStack.pop();
-            String otherVmType = vmTypeStack.peek();
-            if(vmType.equals(otherVmType) == false){
-                //if we're trying to operate on two different types let's
-                //first do a type conversation and then determine the proper
-                //new type
-                if(vmType.equals("I") && otherVmType.equals("F")){
-                    //The variable at the top of the stack is an Int
-                    //and the one below it is a Float. We should...
-                    mainMethod.visitInsn(I2F); //convert the int to a float
-
-                    //and then proceed with float as the data type
-                    vmType = "F";
-                }else if(vmType.equals("F") && otherVmType.equals("I")){
-                    //The variable at the top of the stack is a float
-                    //and the one before it is an Int.
-                    //This scenario is similar to the last one, except we must first...
-                    mainMethod.visitInsn(SWAP); //swap the top two variables so that we can
-                    mainMethod.visitInsn(I2F); //convert the int to a float
-
-                    //and then proceed with float as the data type
-                    vmType = "F";
-                    //but we must also ensure that our internal type stack is correct
-                    vmTypeStack.pop();
-                    vmTypeStack.push("F");
-                }
-            }
-            if(vmType.equals("I")) {
-                mainMethod.visitInsn(IADD);
-            }else if(vmType.equals("F")){
-                mainMethod.visitInsn(FADD);
-            }
-            //TODO: more types
+            _handleOp(op);
         }
     }
 
@@ -377,5 +344,43 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         if(debug) {
             System.out.println(msg);
         }
+    }
+
+    private void _handleOp(String op){
+        System.out.println("_handleOp");
+        //TODO: look at op
+        String vmType = vmTypeStack.pop();
+        String otherVmType = vmTypeStack.peek();
+        if(vmType.equals(otherVmType) == false){
+            //if we're trying to operate on two different types let's
+            //first do a type conversation and then determine the proper
+            //new type
+            if(vmType.equals("I") && otherVmType.equals("F")){
+                //The variable at the top of the stack is an Int
+                //and the one below it is a Float. We should...
+                mainMethod.visitInsn(I2F); //convert the int to a float
+
+                //and then proceed with float as the data type
+                vmType = "F";
+            }else if(vmType.equals("F") && otherVmType.equals("I")){
+                //The variable at the top of the stack is a float
+                //and the one before it is an Int.
+                //This scenario is similar to the last one, except we must first...
+                mainMethod.visitInsn(SWAP); //swap the top two variables so that we can
+                mainMethod.visitInsn(I2F); //convert the int to a float
+
+                //and then proceed with float as the data type
+                vmType = "F";
+                //but we must also ensure that our internal type stack is correct
+                vmTypeStack.pop();
+                vmTypeStack.push("F");
+            }
+        }
+        if(vmType.equals("I")) {
+            mainMethod.visitInsn(IADD);
+        }else if(vmType.equals("F")){
+            mainMethod.visitInsn(FADD);
+        }
+        //TODO: more types
     }
 }
