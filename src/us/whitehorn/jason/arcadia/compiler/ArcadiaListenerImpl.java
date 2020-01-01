@@ -84,21 +84,6 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     @Override
     public void exitInt_result(ArcadiaParser.Int_resultContext ctx) {
         _debug("exitInt_result");
-        if(ctx.parent instanceof ArcadiaParser.Int_resultContext){
-            return; //HACK: dynamic results can be nested.
-        }
-        if(ctx.parent instanceof ArcadiaParser.Float_resultContext){
-            return; //HACK: dynamic results can be nested.
-        }
-        for (ParseTree t : ctx.children) {
-            String txt = t.getText();
-            if (t instanceof TerminalNodeImpl) {
-                //do nothing, yet
-            } else {
-                vmTypeStack.push("I");
-                mainMethod.visitIntInsn(BIPUSH, Integer.parseInt(txt)); //TODO: support larger than shorts
-            }
-        }
         if(ctx.op != null) {
             String op = ctx.op.getText();
             vmTypeStack.pop();
@@ -112,24 +97,30 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     }
 
     @Override
+    public void exitInt_t(ArcadiaParser.Int_tContext ctx) {
+        _debug("exitInt_t");
+        String txt = ctx.getText();
+
+        vmTypeStack.push("I");
+        mainMethod.visitIntInsn(BIPUSH, Integer.parseInt(txt)); //TODO: support larger than shorts
+    }
+
+    @Override
     public void exitFloat_result(ArcadiaParser.Float_resultContext ctx) {
-        _debug("exitFloat_result");
-        if(ctx.parent instanceof ArcadiaParser.Float_resultContext){
-            return; //HACK: dynamic results can be nested.
-        }
-        for (ParseTree t : ctx.children) {
-            String txt = t.getText();
-            if (t instanceof TerminalNodeImpl) {
-                //do nothing, yet
-            } else {
-                vmTypeStack.push("F");
-                mainMethod.visitLdcInsn(Float.parseFloat(txt));
-            }
-        }
         if(ctx.op != null) {
             String op = ctx.op.getText();
             _handleOp(op);
         }
+    }
+
+    @Override
+    public void exitFloat_t(ArcadiaParser.Float_tContext ctx) {
+        _debug("exitFloat_t");
+
+        String txt = ctx.getText();
+
+        vmTypeStack.push("F");
+        mainMethod.visitLdcInsn(Float.parseFloat(txt));
     }
 
     @Override

@@ -484,4 +484,23 @@ public class ArcadiaListenerImplTests {
         Float output = (Float) prog._debugOutput;
         assertEquals(1.5, output, 0.0001);
     }
+
+    @Test
+    public void tesAddThreeIntegers() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 1 + 2 + 3 \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        int output = (int) prog._debugOutput;
+        assertEquals(6, output);
+    }
 }
