@@ -67,7 +67,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
 
         mainMethod = cw.visitMethod(
                 ACC_PUBLIC,                         // public method
-                "run",                           // method name
+                "main",                           // method name
                 "()V",                              // descriptor
                 null,                               // signature (null means not generic)
                 null);                              // exceptions (array of strings)

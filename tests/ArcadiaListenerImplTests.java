@@ -2,6 +2,7 @@ import org.junit.Test;
 import us.whitehorn.jason.arcadia.compiler.ArcadiaCompiler;
 import us.whitehorn.jason.arcadia.core.ArcadiaProgram;
 
+import static junit.framework.Assert.assertNull;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
@@ -635,5 +636,24 @@ public class ArcadiaListenerImplTests {
         prog.run();
         int output = (int) prog._debugOutput;
         assertEquals(10, output);
+    }
+
+    @Test
+    public void tesDivideByIntegerZero() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 20 / 0 \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        Object output = prog._debugOutput;
+        assertNull(output);
     }
 }

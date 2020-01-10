@@ -16,6 +16,14 @@ public class ArcadiaProgram {
     }
 
     public void run(){
+        try{
+            main();
+        }catch(Exception ex){
+            System.out.println("Unhandled exception! ".concat(ex.getMessage()));
+        }
+    }
+
+    public void main(){
 
     }
 
