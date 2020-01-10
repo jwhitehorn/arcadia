@@ -579,4 +579,23 @@ public class ArcadiaListenerImplTests {
         int output = (int) prog._debugOutput;
         assertEquals(6, output);
     }
+
+    @Test
+    public void tesMultiplyTwoFloats() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 2.5 * 3.0 \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        float output = (float) prog._debugOutput;
+        assertEquals(7.5, output, 0.001);
+    }
 }

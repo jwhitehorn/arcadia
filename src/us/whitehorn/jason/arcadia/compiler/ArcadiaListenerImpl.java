@@ -354,7 +354,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             if (vmType.equals("I")) {
                 mainMethod.visitInsn(IMUL);
             } else if (vmType.equals("F")) {
-                //mainMethod.visitInsn(FMUL);
+                mainMethod.visitInsn(FMUL);
             }
         }else if(op.equals("-")){
             if (vmType.equals("I")) {
