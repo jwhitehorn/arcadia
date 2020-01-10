@@ -675,4 +675,43 @@ public class ArcadiaListenerImplTests {
         float output = (float) prog._debugOutput;
         assertEquals(40.0, output, 0.001);
     }
+
+    @Test
+    public void testDefineEmptyMethod() {
+        ArcadiaProgram prog = null;
+        String script =
+                "def empty_method \n" +
+                "end \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+    }
+
+    @Test
+    public void testCallSimpleMethod() {
+        ArcadiaProgram prog = null;
+        String script =
+                "def simple_method \n" +
+                "   _debug 42 \n" +
+                "end \n" +
+                "simple_method()\n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+
+        int output = (int) prog._debugOutput;
+        assertEquals(42, output);
+    }
 }

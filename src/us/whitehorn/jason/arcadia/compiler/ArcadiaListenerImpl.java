@@ -293,6 +293,12 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         mainMethod.visitLabel(loopScope.getBlockEnd());
     }
 
+    @Override
+    public void exitFunction_definition_header(ArcadiaParser.Function_definition_headerContext ctx) {
+        String funcName = ctx.function_name().getText();
+        //TODO
+    }
+
     public ArcadiaProgram finish() throws IllegalAccessException, InstantiationException {
         _debug("finish");
         mainMethod.visitInsn(RETURN);                      // End the constructor method
