@@ -360,7 +360,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             if (vmType.equals("I")) {
                 mainMethod.visitInsn(ISUB);
             } else if (vmType.equals("F")) {
-                //mainMethod.visitInsn(FMUL);
+                mainMethod.visitInsn(FSUB);
             }
         }
         //TODO: more types
