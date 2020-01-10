@@ -617,4 +617,23 @@ public class ArcadiaListenerImplTests {
         float output = (float) prog._debugOutput;
         assertEquals(7.5, output, 0.001);
     }
+
+    @Test
+    public void tesDivideTwoIntegers() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 20 / 2 \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        int output = (int) prog._debugOutput;
+        assertEquals(10, output);
+    }
 }

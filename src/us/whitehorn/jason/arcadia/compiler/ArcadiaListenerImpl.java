@@ -362,6 +362,10 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             } else if (vmType.equals("F")) {
                 mainMethod.visitInsn(FSUB);
             }
+        }else if(op.equals("/")){
+            if (vmType.equals("I")) {
+                mainMethod.visitInsn(IDIV);
+            }
         }
         //TODO: more types
     }
