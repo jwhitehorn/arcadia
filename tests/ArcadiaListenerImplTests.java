@@ -560,4 +560,23 @@ public class ArcadiaListenerImplTests {
         int output = (int) prog._debugOutput;
         assertEquals(10, output);
     }
+
+    @Test
+    public void tesMultiplyTwoIntegers() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = 2 * 3 \n" +
+                "_debug i \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        int output = (int) prog._debugOutput;
+        assertEquals(6, output);
+    }
 }

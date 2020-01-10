@@ -84,15 +84,10 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     @Override
     public void exitInt_result(ArcadiaParser.Int_resultContext ctx) {
         _debug("exitInt_result");
+
         if(ctx.op != null) {
             String op = ctx.op.getText();
-            vmTypeStack.pop();
-            if(op.equals("+")) {
-                mainMethod.visitInsn(IADD);
-            }else if(op.equals("-")){
-                mainMethod.visitInsn(ISUB);
-            }
-            //TODO: more operations
+            _handleOp(op);
         }
     }
 
@@ -124,37 +119,33 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     }
 
     @Override
-    public void exitDynamic_result(ArcadiaParser.Dynamic_resultContext ctx){
+    public void exitDynamic_result(ArcadiaParser.Dynamic_resultContext ctx) {
         _debug("exitDynamic_result");
-        if(ctx.parent instanceof ArcadiaParser.Dynamic_resultContext){
-            return; //HACK: dynamic results can be nested.
-        }
-        for (ParseTree t : ctx.children) {
-            if (t instanceof TerminalNodeImpl) {
-                continue;   //we'll get these later
-            }
-            String rvalue = t.getText();
-            ArcadiaSymbol symbol = symbolTable.get(rvalue);
-            if(symbol == null){
-                continue; //these are likely literals are were picked up by other rules
-            }
-            String vmType = symbol.getVMType();
-            if (vmType.equals("I")) {
-                vmTypeStack.push("I");
-                mainMethod.visitVarInsn(ILOAD, symbol.getSymbolId());
-            } else if(vmType.equals("F")){
-                vmTypeStack.push("F");
-                mainMethod.visitVarInsn(FLOAD, symbol.getSymbolId());
-            } else {
-                //assume to be an object
-                vmTypeStack.push("Ljava/lang/String;");
-                mainMethod.visitVarInsn(ALOAD, symbol.getSymbolId());
-            }
-        }
         if(ctx.op != null) {
             String op = ctx.op.getText();
             _handleOp(op);
         }
+    }
+    @Override
+    public void exitDynamic(ArcadiaParser.DynamicContext ctx) {
+        _debug("exitDynamic");
+
+        String rvalue = ctx.getText();
+        ArcadiaSymbol symbol = symbolTable.get(rvalue);
+
+        String vmType = symbol.getVMType();
+        if (vmType.equals("I")) {
+            vmTypeStack.push("I");
+            mainMethod.visitVarInsn(ILOAD, symbol.getSymbolId());
+        } else if(vmType.equals("F")){
+            vmTypeStack.push("F");
+            mainMethod.visitVarInsn(FLOAD, symbol.getSymbolId());
+        } else {
+            //assume to be an object
+            vmTypeStack.push("Ljava/lang/String;");
+            mainMethod.visitVarInsn(ALOAD, symbol.getSymbolId());
+        }
+
     }
 
     @Override
@@ -351,10 +342,26 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
                 vmTypeStack.push("F");
             }
         }
-        if(vmType.equals("I")) {
-            mainMethod.visitInsn(IADD);
-        }else if(vmType.equals("F")){
-            mainMethod.visitInsn(FADD);
+
+
+        if(op.equals("+")) {
+            if (vmType.equals("I")) {
+                mainMethod.visitInsn(IADD);
+            } else if (vmType.equals("F")) {
+                mainMethod.visitInsn(FADD);
+            }
+        }else if(op.equals("*")){
+            if (vmType.equals("I")) {
+                mainMethod.visitInsn(IMUL);
+            } else if (vmType.equals("F")) {
+                //mainMethod.visitInsn(FMUL);
+            }
+        }else if(op.equals("-")){
+            if (vmType.equals("I")) {
+                mainMethod.visitInsn(ISUB);
+            } else if (vmType.equals("F")) {
+                //mainMethod.visitInsn(FMUL);
+            }
         }
         //TODO: more types
     }
