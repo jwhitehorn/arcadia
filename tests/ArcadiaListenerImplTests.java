@@ -714,4 +714,43 @@ public class ArcadiaListenerImplTests {
         int output = (int) prog._debugOutput;
         assertEquals(42, output);
     }
+
+    @Test
+    public void testDefineMethodWithNameForbiddenInJava() {
+        ArcadiaProgram prog = null;
+        String script =
+                "def fun? \n" +
+                "end \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+    }
+
+    @Test
+    public void testCallMethodWithNameForbiddenInJava() {
+        ArcadiaProgram prog = null;
+        String script =
+                "def fun? \n" +
+                "   _debug 42 \n" +
+                "end \n" +
+                "fun?()\n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+
+        int output = (int) prog._debugOutput;
+        assertEquals(42, output);
+    }
 }
