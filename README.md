@@ -12,7 +12,7 @@ Arcadia is a small dynamic language designed to put the developer experience fir
 
 Types include:
 
-Strings, Integers, and Float (more coming soon).
+Strings, integers, floats, and arrays.
 
 ```RUBY
 i = 0
@@ -28,4 +28,10 @@ You can define methods:
 def honk
     puts "HONK!"
 end
+```
+
+Empty arrays:
+
+```RUBY
+arr = []
 ```
