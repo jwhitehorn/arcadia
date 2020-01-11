@@ -37,5 +37,6 @@ public class ArcadiaProgram {
     public void _debug(float var){
         _debugOutput = var;
     }
+    public void _debug(Object[] var){ _debugOutput = var; }
 
 }

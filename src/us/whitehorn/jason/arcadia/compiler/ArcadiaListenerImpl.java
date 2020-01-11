@@ -148,9 +148,12 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         } else if(vmType.equals("F")){
             vmTypeStack.push("F");
             method.visitVarInsn(FLOAD, symbol.getSymbolId());
-        } else {
-            //assume to be an object
+        } else if(vmType.equals("Ljava/lang/String;")){
             vmTypeStack.push("Ljava/lang/String;");
+            method.visitVarInsn(ALOAD, symbol.getSymbolId());
+        }else {
+            //assumed to be an array
+            vmTypeStack.push("[Ljava/lang/Object;");
             method.visitVarInsn(ALOAD, symbol.getSymbolId());
         }
 
@@ -252,7 +255,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
 
         if(symbol == null){
             //define variable
-            symbol = new ArcadiaSymbol(lvalue, "Ljava/lang/Object", symbolTable.size() + 1);
+            symbol = new ArcadiaSymbol(lvalue, "[Ljava/lang/Object", symbolTable.size() + 1);
             symbolTable.put(lvalue, symbol);
         }
 
