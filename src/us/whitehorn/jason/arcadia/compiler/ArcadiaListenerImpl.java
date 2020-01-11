@@ -243,6 +243,27 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     }
 
     @Override
+    public void exitInitial_array_assignment(ArcadiaParser.Initial_array_assignmentContext ctx) {
+        _debug("exitInitial_array_assignment");
+
+        MethodVisitor method = methodStack.peek();
+        String lvalue = ctx.lvalue().getText();
+        ArcadiaSymbol symbol = symbolTable.get(lvalue);
+
+        if(symbol == null){
+            //define variable
+            symbol = new ArcadiaSymbol(lvalue, "Ljava/lang/Object", symbolTable.size() + 1);
+            symbolTable.put(lvalue, symbol);
+        }
+
+        method.visitIntInsn(BIPUSH, 0);
+        method.visitTypeInsn(ANEWARRAY, "java/lang/Object");
+
+        //vmTypeStack.pop();
+        method.visitVarInsn(ASTORE, symbol.getSymbolId());
+    }
+
+    @Override
     public void exitComparison(ArcadiaParser.ComparisonContext ctx) {
         _debug("exitComparison");
         MethodVisitor method = methodStack.peek();

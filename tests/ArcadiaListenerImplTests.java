@@ -753,4 +753,40 @@ public class ArcadiaListenerImplTests {
         int output = (int) prog._debugOutput;
         assertEquals(42, output);
     }
+
+    @Test
+    public void tesDefineEmptyArray() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = [] \n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+    }
+
+    @Test
+    public void tesPassEmptyArrayToFunction() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = [] \n" +
+                "_debug i\n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        assertNotNull(prog._debugOutput);
+        Object[] output = (Object[]) prog._debugOutput;
+        assertEquals(output.length, 0);
+    }
 }
