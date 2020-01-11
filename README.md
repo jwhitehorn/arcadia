@@ -21,3 +21,11 @@ while i < 100
   puts "HI!"
 end
 ``` 
+
+You can define methods:
+
+```RUBY
+def honk
+    puts "HONK!"
+end
+```
