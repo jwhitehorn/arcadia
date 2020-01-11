@@ -311,7 +311,23 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     @Override
     public void exitFunction_definition_header(ArcadiaParser.Function_definition_headerContext ctx) {
         String funcName = ctx.function_name().getText();
-        //TODO
+
+        MethodVisitor method = cw.visitMethod(
+                ACC_PUBLIC,                         // public method
+                funcName,                           // method name
+                "()V",                              // descriptor
+                null,                               // signature (null means not generic)
+                null);                              // exceptions (array of strings)
+        method.visitCode();                            // Start the code for this method
+        methodStack.push(method);
+        funcTable.put(funcName, "V");
+    }
+
+    @Override
+    public void exitFunction_definition(ArcadiaParser.Function_definitionContext ctx) {
+        MethodVisitor method = methodStack.pop();
+        method.visitInsn(RETURN);                      // End the constructor method
+        method.visitMaxs(1, 1);                        // Specify max stack and local vars
     }
 
     public ArcadiaProgram finish() throws IllegalAccessException, InstantiationException {
