@@ -35,3 +35,19 @@ Empty arrays:
 ```RUBY
 arr = []
 ```
+
+Variables have types in Arcadia, but can be reassigned:
+
+```RUBY
+i = 4
+i = "Hello"
+```
+
+Type conversions automatically occur and "do the right thing":
+
+```RUBY
+i = 4
+i = i + 0.5
+```
+
+In the above example, the variable `i` begins life holding an integer, but when the float 0.5 is added to it, `i` now holds a float.
