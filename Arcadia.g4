@@ -1,3 +1,8 @@
+/*
+
+Grammar adapter from: https://github.com/AlexBelov/corundum
+
+*/
 grammar Arcadia;
 
 prog : expression_list;
