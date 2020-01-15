@@ -458,16 +458,6 @@ public interface ArcadiaListener extends ParseTreeListener {
 	 */
 	void exitString_assignment(ArcadiaParser.String_assignmentContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link ArcadiaParser#initial_array_assignment}.
-	 * @param ctx the parse tree
-	 */
-	void enterInitial_array_assignment(ArcadiaParser.Initial_array_assignmentContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link ArcadiaParser#initial_array_assignment}.
-	 * @param ctx the parse tree
-	 */
-	void exitInitial_array_assignment(ArcadiaParser.Initial_array_assignmentContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link ArcadiaParser#array_assignment}.
 	 * @param ctx the parse tree
 	 */

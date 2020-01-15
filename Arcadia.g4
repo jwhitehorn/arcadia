@@ -153,11 +153,11 @@ string_assignment : var_r_id=lvalue op=ASSIGN string_result
                   | var_r_id=lvalue op=PLUS_ASSIGN string_result
                   ;
 
-initial_array_assignment : var_r_id=lvalue op=ASSIGN LEFT_SBRACKET RIGHT_SBRACKET;
+array_assignment : var_id=lvalue op=ASSIGN arr_val=array_definition;
 
-array_assignment : arr_def=array_selector op=ASSIGN arr_val=all_result;
-
-array_definition : LEFT_SBRACKET array_definition_elements RIGHT_SBRACKET;
+array_definition : LEFT_SBRACKET array_definition_elements RIGHT_SBRACKET
+                 |  LEFT_SBRACKET RIGHT_SBRACKET
+                 ;
 
 array_definition_elements : ( int_result | dynamic_result )
                           | array_definition_elements COMMA ( int_result | dynamic_result )
@@ -233,7 +233,6 @@ lvalue : r_id
 
 rvalue : lvalue
 
-       | initial_array_assignment
        | array_assignment
 
        | int_result

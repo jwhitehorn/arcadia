@@ -556,18 +556,6 @@ public class ArcadiaBaseListener implements ArcadiaListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInitial_array_assignment(ArcadiaParser.Initial_array_assignmentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitInitial_array_assignment(ArcadiaParser.Initial_array_assignmentContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterArray_assignment(ArcadiaParser.Array_assignmentContext ctx) { }
 	/**
 	 * {@inheritDoc}

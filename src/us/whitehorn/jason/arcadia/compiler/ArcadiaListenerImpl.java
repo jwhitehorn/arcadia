@@ -33,6 +33,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         //Define built-in functions
         funcTable.put("puts", "V");
         funcTable.put("_debug", "V");
+        funcTable.put("_box", "Ljava/lang/Object;");
 
         scope = new Stack<>();
         vmTypeStack = new Stack<>();
@@ -246,8 +247,8 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     }
 
     @Override
-    public void exitInitial_array_assignment(ArcadiaParser.Initial_array_assignmentContext ctx) {
-        _debug("exitInitial_array_assignment");
+    public void exitArray_assignment(ArcadiaParser.Array_assignmentContext ctx) {
+        _debug("exitArray_assignment");
 
         MethodVisitor method = methodStack.peek();
         String lvalue = ctx.lvalue().getText();
@@ -258,12 +259,32 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
             symbol = new ArcadiaSymbol(lvalue, "[Ljava/lang/Object", symbolTable.size() + 1);
             symbolTable.put(lvalue, symbol);
         }
+        int items = ctx.array_definition().children.size() - 2; //2 being the [ and ] that are always present
+        for(int i = 0; i != items; i++){
 
-        method.visitIntInsn(BIPUSH, 0);
+            String callDescriptor = ")".concat(funcTable.get("_box"));
+            callDescriptor = vmTypeStack.pop() + callDescriptor;
+            callDescriptor = "(" + callDescriptor;
+
+            //TODO: get boxing working. AS-IS this code results in a stack underflow error.
+            method.visitMethodInsn(INVOKEVIRTUAL,
+                    "us/whitehorn/jason/arcadia/DynamicArcadiaProgram",
+                    "_box",
+                    callDescriptor,
+                    false);
+        }
+
+        System.out.println("-->".concat(String.valueOf(items)));
+
+        method.visitIntInsn(BIPUSH, items);
         method.visitTypeInsn(ANEWARRAY, "java/lang/Object");
 
-        //vmTypeStack.pop();
         method.visitVarInsn(ASTORE, symbol.getSymbolId());
+    }
+
+    @Override
+    public void exitArray_definition(ArcadiaParser.Array_definitionContext ctx) {
+        _debug("exitArray_definition");
     }
 
     @Override
@@ -391,7 +412,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
 
                 //and then proceed with float as the data type
                 vmType = "F";
-            }else if(vmType.equals("F") && otherVmType.equals("I")){
+            }else if(vmType.equals("F") && otherVmType.equals("I")) {
                 //The variable at the top of the stack is a float
                 //and the one before it is an Int.
                 //This scenario is similar to the last one, except we must first...

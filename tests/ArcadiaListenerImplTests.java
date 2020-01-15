@@ -789,4 +789,26 @@ public class ArcadiaListenerImplTests {
         Object[] output = (Object[]) prog._debugOutput;
         assertEquals(output.length, 0);
     }
+
+    @Test
+    public void tesDefineArrayWithAnInteger() {
+        ArcadiaProgram prog = null;
+        String script =
+                "i = [42] \n" +
+                "_debug i\n";
+        try {
+            prog = ArcadiaCompiler.compile(script);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(prog);
+        prog.run();
+        assertNotNull(prog._debugOutput);
+        Object[] output = (Object[]) prog._debugOutput;
+        assertEquals(output.length, 1);
+        int thing = (int)output[0];
+        assertEquals(thing, 42);
+    }
 }

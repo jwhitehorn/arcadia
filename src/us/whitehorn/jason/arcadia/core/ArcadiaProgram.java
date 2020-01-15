@@ -39,4 +39,6 @@ public class ArcadiaProgram {
     }
     public void _debug(Object[] var){ _debugOutput = var; }
 
+    public Object _box(int var) { return Integer.valueOf(var); }
+
 }
