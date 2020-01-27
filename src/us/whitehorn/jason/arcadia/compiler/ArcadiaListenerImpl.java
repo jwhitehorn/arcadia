@@ -25,7 +25,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
     private Stack<String> vmTypeStack;
     private Stack<MethodVisitor> methodStack;
 
-    private Boolean debug = true;
+    private Boolean debug = false;
 
     public ArcadiaListenerImpl(){
         symbolTable = new Hashtable<>();
