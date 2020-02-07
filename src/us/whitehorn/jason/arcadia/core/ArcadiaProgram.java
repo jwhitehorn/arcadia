@@ -1,5 +1,6 @@
 package us.whitehorn.jason.arcadia.core;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -13,6 +14,13 @@ public class ArcadiaProgram {
     }
     public void puts(float message){
         System.out.println(message);
+    }
+    public void exec(String cmd) {
+        try {
+            Runtime.getRuntime().exec(cmd);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void run(){

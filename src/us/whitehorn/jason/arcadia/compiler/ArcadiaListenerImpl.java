@@ -34,6 +34,7 @@ public class ArcadiaListenerImpl extends ArcadiaBaseListener {
         funcTable.put("puts", "V");
         funcTable.put("_debug", "V");
         funcTable.put("_box", "Ljava/lang/Object;");
+        funcTable.put("exec", "V");
 
         scope = new Stack<>();
         vmTypeStack = new Stack<>();
